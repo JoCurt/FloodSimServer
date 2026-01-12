@@ -1,6 +1,6 @@
 using FloodSimulation.Data;
 using Microsoft.EntityFrameworkCore;
-using Npgsql; // NEU
+using Npgsql;
 
 namespace FloodSimulation.Repositories;
 
@@ -15,8 +15,8 @@ public class TerrainRasterRepository : ITerrainRasterRepository
     
     public async Task<double?> GetElevationAtAsync(double x, double y)
     {
-        // Direkte SQL Execution ohne LINQ
-        await using var connection = _context.Database.GetDbConnection();
+        var connectionString = _context.Database.GetConnectionString();
+        await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
         
         await using var command = connection.CreateCommand();
@@ -46,21 +46,26 @@ public class TerrainRasterRepository : ITerrainRasterRepository
     
     public async Task<(double minX, double minY, double maxX, double maxY)?> GetRasterBoundsAsync()
     {
-        await using var connection = _context.Database.GetDbConnection();
+        var connectionString = _context.Database.GetConnectionString();
+        await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
         
         await using var command = connection.CreateCommand();
         command.CommandText = @"
             SELECT 
-                ST_XMin(ST_Envelope(ST_Union(rast))) as MinX,
-                ST_YMin(ST_Envelope(ST_Union(rast))) as MinY,
-                ST_XMax(ST_Envelope(ST_Union(rast))) as MaxX,
-                ST_YMax(ST_Envelope(ST_Union(rast))) as MaxY
-            FROM terrain_raster";
+                ST_XMin(ST_Envelope(rast)) as MinX,
+                ST_YMin(ST_Envelope(rast)) as MinY,
+                ST_XMax(ST_Envelope(rast)) as MaxX,
+                ST_YMax(ST_Envelope(rast)) as MaxY
+            FROM terrain_raster
+            LIMIT 1";
         
         await using var reader = await command.ExecuteReaderAsync();
         
         if (!await reader.ReadAsync())
+            return null;
+        
+        if (reader.IsDBNull(0))
             return null;
         
         var minX = reader.GetDouble(0);
@@ -73,7 +78,6 @@ public class TerrainRasterRepository : ITerrainRasterRepository
     
     public async Task<long> CountRasterTilesAsync()
     {
-        // Diese Methode nutzt normale EF Core Query - kein Problem
         return await _context.TerrainRasters.CountAsync();
     }
 }

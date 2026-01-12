@@ -68,82 +68,93 @@ dotnet run
 
 ## API Endpoints
 
-### Health & Diagnostics
-
-#### `GET /api/test/health`
-Check if the server is running.
-
-**Response:**
-```json
-{
-  "status": "Server is running!",
-  "timestamp": "2026-01-12T10:30:00Z"
-}
-```
-
-#### `GET /api/test/db`
-Test database connectivity and get raster tile count.
-
-**Response:**
-```json
-{
-  "status": "Database connection OK!",
-  "rasterTiles": 42,
-  "connectionString": "Connected to flood_sim_test_db"
-}
-```
-
 ### Terrain Data
 
-#### `GET /api/test/repository/bounds`
-Get the bounding box of all terrain raster data.
+#### `GET /api/terrain/info`
+Get overview of available terrain data including bounds and tile count.
 
 **Response:**
 ```json
 {
-  "status": "Repository works!",
+  "rasterTileCount": 1,
   "bounds": {
-    "minX": 324000,
-    "minY": 5508000,
-    "maxX": 325000,
-    "maxY": 5509000
+    "minX": 323999.5,
+    "minY": 5507999.5,
+    "maxX": 325000.5,
+    "maxY": 5509000.5,
+    "coordinateSystem": "EPSG:25832",
+    "rasterTileCount": 1,
+    "width": 1001.0,
+    "height": 1001.0,
+    "centerX": 324500.0,
+    "centerY": 5508500.0
   },
-  "width": 1000,
-  "height": 1000
+  "coordinateSystem": "EPSG:25832",
+  "status": "ready",
+  "isReady": true
 }
 ```
 
-#### `GET /api/test/repository/elevation?x={x}&y={y}`
+#### `GET /api/terrain/bounds`
+Get the geographic bounding box of all terrain raster data.
+
+**Response:**
+```json
+{
+  "minX": 323999.5,
+  "minY": 5507999.5,
+  "maxX": 325000.5,
+  "maxY": 5509000.5,
+  "coordinateSystem": "EPSG:25832",
+  "rasterTileCount": 1,
+  "width": 1001.0,
+  "height": 1001.0,
+  "centerX": 324500.0,
+  "centerY": 5508500.0
+}
+```
+
+#### `GET /api/terrain/elevation?x={x}&y={y}`
 Get elevation at a specific UTM coordinate (EPSG:25832).
 
 **Parameters:**
-- `x` (optional): UTM X coordinate (default: 324500)
-- `y` (optional): UTM Y coordinate (default: 5508500)
+- `x` (required): UTM X coordinate in meters
+- `y` (required): UTM Y coordinate in meters
 
-**Response:**
+**Example:**
+```
+GET /api/terrain/elevation?x=324500&y=5508500
+```
+
+**Response (Success):**
 ```json
 {
-  "status": "Repository works!",
-  "coordinates": {
-    "x": 324500,
-    "y": 5508500
-  },
-  "elevation": 123.45,
+  "x": 324500.0,
+  "y": 5508500.0,
+  "elevation": 156.3,
   "unit": "meters",
-  "hasData": true
+  "coordinateSystem": "EPSG:25832",
+  "hasElevation": true
 }
 ```
 
-#### `GET /api/test/repository/tiles`
-Get the count of raster tiles in the database.
-
-**Response:**
+**Response (Point outside raster):**
 ```json
 {
-  "status": "Repository works!",
-  "tileCount": 42
+  "error": "No elevation data at this coordinate",
+  "message": "Point may be outside the raster bounds",
+  "coordinates": { "x": 999999, "y": 999999 }
 }
 ```
+
+### Health & Diagnostics
+
+#### `GET /api/test/health`
+Server health check endpoint.
+
+#### `GET /api/test/db`
+Database connectivity test with raster tile count.
+
 
 ## Project Structure
 
@@ -151,6 +162,7 @@ Get the count of raster tiles in the database.
 FloodSimulation/
 ├── Controllers/          # API controllers
 │   └── TestController.cs
+│   └── TestController.cs   # Health checks & diagnostics
 ├── Data/                # Database context
 │   └── ApplicationDbContext.cs
 ├── Models/
@@ -163,6 +175,8 @@ FloodSimulation/
 ├── Repositories/        # Data access layer
 │   ├── ITerrainRasterRepository.cs
 │   └── TerrainRasterRepository.cs
+├── Services/ 
+│   └── TerrainService.cs       # Terrain data orchestration
 ├── Properties/          # Launch settings
 ├── appsettings.json    # Configuration
 └── Program.cs          # Application entry point
@@ -225,14 +239,6 @@ Options:
 3. Add repository methods in `Repositories/`
 4. Update database context if needed in `Data/`
 
-### Running Migrations
-
-```bash
-dotnet ef migrations add MigrationName
-dotnet ef database update
-```
-
-## Troubleshooting
 
 ### Database Connection Issues
 
@@ -246,9 +252,6 @@ dotnet ef database update
 - Verify coordinates are within raster bounds
 - Check coordinate reference system matches (EPSG:25832)
 
-## License
-
-This project is part of a flood simulation research application.
 
 ## Contributing
 

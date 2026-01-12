@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using FloodSimulation.Data;
 using FloodSimulation.Repositories;
+using FloodSimulation.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Controllers
 builder.Services.AddScoped<ITerrainRasterRepository, TerrainRasterRepository>();
+builder.Services.AddScoped<TerrainService>();
 
 builder.Services.AddControllers();
 
