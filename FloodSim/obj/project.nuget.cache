@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "YxR/sPFxMNM=",
+  "success": true,
+  "projectFilePath": "/home/jonas/coding/csharp/FloodSimServer/FloodSim/FloodSim.csproj",
+  "expectedPackageFiles": [
+    "/home/jonas/.nuget/packages/microsoft.aspnetcore.openapi/10.0.0/microsoft.aspnetcore.openapi.10.0.0.nupkg.sha512",
+    "/home/jonas/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
+    "/home/jonas/.nuget/packages/system.text.json/8.0.5/system.text.json.8.0.5.nupkg.sha512",
+    "/home/jonas/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.0/microsoft.aspnetcore.app.ref.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
