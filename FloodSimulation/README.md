@@ -126,7 +126,7 @@ Get elevation at a specific UTM coordinate (EPSG:25832).
 GET /api/terrain/elevation?x=324500&y=5508500
 ```
 
-**Response (Success):**
+**Respons intess):**
 ```json
 {
   "x": 324500.0,

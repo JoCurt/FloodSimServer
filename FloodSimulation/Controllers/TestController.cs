@@ -167,4 +167,26 @@ public class TestController : ControllerBase
             });
         }
     }
+    
+    /// <summary>
+    /// Test: Pegel-Stationen abrufen
+    /// </summary>
+    [HttpGet("water-stations")]
+    public async Task<IActionResult> TestWaterStations()
+    {
+        try
+        {
+            var stations = await _context.WaterLevelStations.ToListAsync();
+            return Ok(new
+            {
+                status = "Water level stations table OK!",
+                stationCount = stations.Count,
+                stations = stations.Select(s => new { s.Id, s.Name, s.WaterBody })
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
 }
